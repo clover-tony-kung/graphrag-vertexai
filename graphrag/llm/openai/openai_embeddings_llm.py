@@ -3,6 +3,7 @@
 
 """The EmbeddingsLLM class."""
 
+from langchain_google_vertexai import VertexAIEmbeddings
 from typing_extensions import Unpack
 
 from graphrag.llm.base import BaseLLM
@@ -25,12 +26,7 @@ class OpenAIEmbeddingsLLM(BaseLLM[EmbeddingInput, EmbeddingOutput]):
     async def _execute_llm(
         self, input: EmbeddingInput, **kwargs: Unpack[LLMInput]
     ) -> EmbeddingOutput | None:
-        args = {
-            "model": self.configuration.model,
-            **(kwargs.get("model_parameters") or {}),
-        }
-        embedding = await self.client.embeddings.create(
-            input=input,
-            **args,
+        embedding_model = VertexAIEmbeddings(
+            model_name="text-embedding-004", temperature=0.0
         )
-        return [d.embedding for d in embedding.data]
+        return embedding_model.embed(input)
