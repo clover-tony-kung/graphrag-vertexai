@@ -34,7 +34,7 @@ class VertexAIEmbedding(BaseTextEmbedding):
 
     def embed(self, text: str, **kwargs: Any) -> list[float]:
         """Embed a text string."""
-        return self.embedding.embed(text)
+        return self.embedding.embed([text])[0]
 
     async def aembed(self, text: str, **kwargs: Any) -> list[float]:
         """Embed a text string asynchronously."""
