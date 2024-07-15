@@ -6,20 +6,11 @@
 import tiktoken
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 
-from graphrag.config import (
-    GraphRagConfig,
-    LLMType,
-)
-from graphrag.model import (
-    CommunityReport,
-    Covariate,
-    Entity,
-    Relationship,
-    TextUnit,
-)
+from graphrag.config import GraphRagConfig, LLMType
+from graphrag.model import CommunityReport, Covariate, Entity, Relationship, TextUnit
 from graphrag.query.context_builder.entity_extraction import EntityVectorStoreKey
 from graphrag.query.llm.oai.chat_openai import ChatOpenAI
-from graphrag.query.llm.oai.embedding import OpenAIEmbedding
+from graphrag.query.llm.oai.embedding import OpenAIEmbedding, VertexAIEmbedding
 from graphrag.query.llm.oai.typing import OpenaiApiType
 from graphrag.query.structured_search.global_search.community_context import (
     GlobalCommunityContext,
@@ -109,7 +100,7 @@ def get_local_search_engine(
 ) -> LocalSearch:
     """Create a local search engine based on data + configuration."""
     llm = get_llm(config)
-    text_embedder = get_text_embedder(config)
+    text_embedder = VertexAIEmbedding()
     token_encoder = tiktoken.get_encoding(config.encoding_model)
 
     ls_config = config.local_search

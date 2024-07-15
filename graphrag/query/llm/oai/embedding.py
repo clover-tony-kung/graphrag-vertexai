@@ -9,6 +9,7 @@ from typing import Any
 
 import numpy as np
 import tiktoken
+from langchain_google_vertexai import VertexAIEmbeddings
 from tenacity import (
     AsyncRetrying,
     RetryError,
@@ -20,12 +21,24 @@ from tenacity import (
 
 from graphrag.query.llm.base import BaseTextEmbedding
 from graphrag.query.llm.oai.base import OpenAILLMImpl
-from graphrag.query.llm.oai.typing import (
-    OPENAI_RETRY_ERROR_TYPES,
-    OpenaiApiType,
-)
+from graphrag.query.llm.oai.typing import OPENAI_RETRY_ERROR_TYPES, OpenaiApiType
 from graphrag.query.llm.text_utils import chunk_text
 from graphrag.query.progress import StatusReporter
+
+
+class VertexAIEmbedding(BaseTextEmbedding):
+    def __init__(self):
+        self.embedding = VertexAIEmbeddings(
+            model_name="text-embedding-004", temperature=0.0
+        )
+
+    def embed(self, text: str, **kwargs: Any) -> list[float]:
+        """Embed a text string."""
+        return self.embedding.embed(text)
+
+    async def aembed(self, text: str, **kwargs: Any) -> list[float]:
+        """Embed a text string asynchronously."""
+        return self.embed(text)
 
 
 class OpenAIEmbedding(BaseTextEmbedding, OpenAILLMImpl):
@@ -108,9 +121,9 @@ class OpenAIEmbedding(BaseTextEmbedding, OpenAILLMImpl):
         )
         chunk_embeddings = []
         chunk_lens = []
-        embedding_results = await asyncio.gather(*[
-            self._aembed_with_retry(chunk, **kwargs) for chunk in token_chunks
-        ])
+        embedding_results = await asyncio.gather(
+            *[self._aembed_with_retry(chunk, **kwargs) for chunk in token_chunks]
+        )
         embedding_results = [result for result in embedding_results if result[0]]
         chunk_embeddings = [result[0] for result in embedding_results]
         chunk_lens = [result[1] for result in embedding_results]

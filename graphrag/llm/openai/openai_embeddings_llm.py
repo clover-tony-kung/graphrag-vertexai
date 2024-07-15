@@ -6,11 +6,7 @@
 from typing_extensions import Unpack
 
 from graphrag.llm.base import BaseLLM
-from graphrag.llm.types import (
-    EmbeddingInput,
-    EmbeddingOutput,
-    LLMInput,
-)
+from graphrag.llm.types import EmbeddingInput, EmbeddingOutput, LLMInput
 
 from .openai_configuration import OpenAIConfiguration
 from .types import OpenAIClientTypes
