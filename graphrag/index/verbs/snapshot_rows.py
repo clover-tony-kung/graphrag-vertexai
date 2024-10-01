@@ -5,8 +5,9 @@
 
 import json
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, cast
 
+import pandas as pd
 from datashaper import TableContainer, VerbInput, verb
 
 from graphrag.index.storage import PipelineStorage
@@ -31,9 +32,30 @@ async def snapshot_rows(
     **_kwargs: dict,
 ) -> TableContainer:
     """Take a by-row snapshot of the tabular data."""
-    data = input.get_input()
+    source = cast(pd.DataFrame, input.get_input())
+    output = await snapshot_rows_df(
+        source,
+        column,
+        base_name,
+        storage,
+        formats,
+        row_name_column,
+    )
+    return TableContainer(table=output)
+
+
+# todo: once this is out of "verb land", it does not need to return the input
+async def snapshot_rows_df(
+    input: pd.DataFrame,
+    column: str | None,
+    base_name: str,
+    storage: PipelineStorage,
+    formats: list[str | dict[str, Any]],
+    row_name_column: str | None = None,
+) -> pd.DataFrame:
+    """Take a by-row snapshot of the tabular data."""
     parsed_formats = _parse_formats(formats)
-    num_rows = len(data)
+    num_rows = len(input)
 
     def get_row_name(row: Any, row_idx: Any):
         if row_name_column is None:
@@ -42,32 +64,35 @@ async def snapshot_rows(
             return f"{base_name}.{row_idx}"
         return f"{base_name}.{row[row_name_column]}"
 
-    for row_idx, row in data.iterrows():
+    for row_idx, row in input.iterrows():
         for fmt in parsed_formats:
             row_name = get_row_name(row, row_idx)
             extension = fmt.extension
             if fmt.format == "json":
                 await storage.set(
                     f"{row_name}.{extension}",
-                    json.dumps(row[column])
-                    if column is not None
-                    else json.dumps(row.to_dict()),
+                    (
+                        json.dumps(row[column], ensure_ascii=False)
+                        if column is not None
+                        else json.dumps(row.to_dict(), ensure_ascii=False)
+                    ),
                 )
             elif fmt.format == "text":
                 if column is None:
                     msg = "column must be specified for text format"
                     raise ValueError(msg)
                 await storage.set(f"{row_name}.{extension}", str(row[column]))
-
-    return TableContainer(table=data)
+    return input
 
 
 def _parse_formats(formats: list[str | dict[str, Any]]) -> list[FormatSpecifier]:
     """Parse the formats into a list of FormatSpecifiers."""
     return [
-        FormatSpecifier(**fmt)
-        if isinstance(fmt, dict)
-        else FormatSpecifier(format=fmt, extension=_get_format_extension(fmt))
+        (
+            FormatSpecifier(**fmt)
+            if isinstance(fmt, dict)
+            else FormatSpecifier(format=fmt, extension=_get_format_extension(fmt))
+        )
         for fmt in formats
     ]
 

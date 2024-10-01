@@ -20,6 +20,7 @@ isna
 getcwd
 fillna
 noqa
+dtypes
 
 # Azure
 abfs
@@ -97,6 +98,9 @@ retryer
 agenerate
 aembed
 dedupe
+dropna
+dtypes
+notna
 
 # LLM Terms
 AOAI
@@ -132,11 +136,30 @@ MSRC
 Arrary
 
 # Prompt Inputs
-dulce
-Asadi
 ABILA
 Abila
+ALHAMIA
+Alhamia
+Asadi
+Aurelians
+Bataglani
+BATAGLANI
+Bratinas
+dulce
+Durke
+Firuzabad
+Firuzabad's
+FIRUZABAD
+Krohaara
+KROHAARA
 POKRALLY
+Tazbah
+TIRUZIA
+Tiruzia
+Tiruzia's
+Verdantis
+Verdantis's
+
 
 # English
 skippable
