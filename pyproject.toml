@@ -58,7 +58,7 @@ aiofiles = "^24.1.0"
 openai = "^1.46.1"
 nltk = "3.9.1"
 tiktoken = "^0.7.0"
-langchain_google_vertexai = "1.0.6"
+langchain_google_vertexai = "2.0.2"
 
 # Data-Sci
 numpy = "^1.25.2"
